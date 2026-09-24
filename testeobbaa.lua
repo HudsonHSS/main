@@ -10,12 +10,10 @@ local mouse = player:GetMouse()
 -- CONFIGURAÇÃO
 -- =========================================================
 
-local DROP_KICK_ANIMATION_ID = "rbxassetid://133566007754001"
-
 local atravessar = false
 local selecionando = false
 local invisivel = false
-local dropfling = false
+local fling = false
 local espAtivo = false
 local rgbAtivo = true
 local minimizado = false
@@ -25,9 +23,7 @@ local selectedHighlights = {}
 local invisibilityOriginals = {}
 local espHighlights = {}
 
-local dropAnimationTrack
-local dropTouchedConnection
-local dropCharacterConnection
+local flingCharacterConnection
 
 -- =========================================================
 -- GUI PRINCIPAL
@@ -37,8 +33,6 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "ObjectToolsUI"
 gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.DisplayOrder = 1000
-gui.IgnoreGuiInset = true
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local janela = Instance.new("Frame")
@@ -47,7 +41,6 @@ janela.Size = UDim2.fromOffset(460, 430)
 janela.Position = UDim2.new(0.5, -230, 0.5, -215)
 janela.BackgroundColor3 = Color3.fromRGB(18, 20, 27)
 janela.BorderSizePixel = 0
-janela.ZIndex = 1
 janela.Parent = gui
 
 local janelaCorner = Instance.new("UICorner")
@@ -65,7 +58,6 @@ barra.Name = "Barra"
 barra.Size = UDim2.new(1, 0, 0, 50)
 barra.BackgroundColor3 = Color3.fromRGB(24, 27, 36)
 barra.BorderSizePixel = 0
-barra.ZIndex = 2
 barra.Parent = janela
 
 local barraCorner = Instance.new("UICorner")
@@ -77,7 +69,6 @@ barraMask.Size = UDim2.new(1, 0, 0, 14)
 barraMask.Position = UDim2.new(0, 0, 1, -14)
 barraMask.BackgroundColor3 = Color3.fromRGB(24, 27, 36)
 barraMask.BorderSizePixel = 0
-barraMask.ZIndex = 2
 barraMask.Parent = barra
 
 local titulo = Instance.new("TextLabel")
@@ -89,9 +80,6 @@ titulo.Text = "HACKER TOOLS"
 titulo.TextColor3 = Color3.fromRGB(245, 246, 250)
 titulo.TextSize = 17
 titulo.TextXAlignment = Enum.TextXAlignment.Left
-titulo.TextTransparency = 0
-titulo.Visible = true
-titulo.ZIndex = 10
 titulo.Parent = barra
 
 local subtitulo = Instance.new("TextLabel")
@@ -103,9 +91,6 @@ subtitulo.Text = "Ferramentas do seu jogo"
 subtitulo.TextColor3 = Color3.fromRGB(135, 141, 156)
 subtitulo.TextSize = 10
 subtitulo.TextXAlignment = Enum.TextXAlignment.Left
-subtitulo.TextTransparency = 0
-subtitulo.Visible = true
-subtitulo.ZIndex = 10
 subtitulo.Parent = barra
 
 local minimizar = Instance.new("TextButton")
@@ -119,9 +104,6 @@ minimizar.Font = Enum.Font.GothamBold
 minimizar.Text = "—"
 minimizar.TextColor3 = Color3.fromRGB(220, 223, 230)
 minimizar.TextSize = 16
-minimizar.TextTransparency = 0
-minimizar.Visible = true
-minimizar.ZIndex = 11
 minimizar.Parent = barra
 
 local minCorner = Instance.new("UICorner")
@@ -139,9 +121,6 @@ fechar.Font = Enum.Font.GothamBold
 fechar.Text = "×"
 fechar.TextColor3 = Color3.fromRGB(220, 223, 230)
 fechar.TextSize = 20
-fechar.TextTransparency = 0
-fechar.Visible = true
-fechar.ZIndex = 11
 fechar.Parent = barra
 
 local closeCorner = Instance.new("UICorner")
@@ -157,16 +136,16 @@ abas.Name = "Abas"
 abas.BackgroundTransparency = 1
 abas.Position = UDim2.fromOffset(14, 58)
 abas.Size = UDim2.new(1, -28, 0, 38)
-abas.ZIndex = 3
 abas.Parent = janela
 
 local abaObjetos = Instance.new("TextButton")
 local abaPlayer = Instance.new("TextButton")
 local abaVisual = Instance.new("TextButton")
 local abaConfig = Instance.new("TextButton")
+local abaFun = Instance.new("TextButton")
 
 local function configurarAba(botao, nome)
-	botao.Size = UDim2.new(0.25, -4, 1, 0)
+	botao.Size = UDim2.new(0.2, -4, 1, 0)
 	botao.BackgroundColor3 = Color3.fromRGB(29, 33, 43)
 	botao.BorderSizePixel = 0
 	botao.AutoButtonColor = false
@@ -174,9 +153,6 @@ local function configurarAba(botao, nome)
 	botao.Text = nome
 	botao.TextColor3 = Color3.fromRGB(170, 175, 188)
 	botao.TextSize = 11
-	botao.TextTransparency = 0
-	botao.Visible = true
-	botao.ZIndex = 10
 	botao.Parent = abas
 
 	local corner = Instance.new("UICorner")
@@ -193,18 +169,19 @@ configurarAba(abaObjetos, "OBJETOS")
 configurarAba(abaPlayer, "PLAYER")
 configurarAba(abaVisual, "VISUAL")
 configurarAba(abaConfig, "CONFIG")
+configurarAba(abaFun, "FUN")
 
 abaObjetos.Position = UDim2.new(0, 0, 0, 0)
-abaPlayer.Position = UDim2.new(0.25, 2, 0, 0)
-abaVisual.Position = UDim2.new(0.5, 2, 0, 0)
-abaConfig.Position = UDim2.new(0.75, 2, 0, 0)
+abaPlayer.Position = UDim2.new(0.2, 2, 0, 0)
+abaVisual.Position = UDim2.new(0.4, 2, 0, 0)
+abaConfig.Position = UDim2.new(0.6, 2, 0, 0)
+abaFun.Position = UDim2.new(0.8, 2, 0, 0)
 
 local conteudo = Instance.new("Frame")
 conteudo.Name = "Conteudo"
 conteudo.BackgroundTransparency = 1
 conteudo.Position = UDim2.fromOffset(14, 104)
 conteudo.Size = UDim2.new(1, -28, 1, -118)
-conteudo.ZIndex = 3
 conteudo.Parent = janela
 
 local function criarPagina(nome)
@@ -212,7 +189,6 @@ local function criarPagina(nome)
 	pagina.Name = nome
 	pagina.Size = UDim2.fromScale(1, 1)
 	pagina.BackgroundTransparency = 1
-	pagina.ZIndex = 4
 	pagina.Visible = false
 	pagina.Parent = conteudo
 	return pagina
@@ -222,6 +198,7 @@ local paginaObjetos = criarPagina("Objetos")
 local paginaPlayer = criarPagina("Player")
 local paginaVisual = criarPagina("Visual")
 local paginaConfig = criarPagina("Config")
+local paginaFun = criarPagina("Fun")
 
 local paginaAtiva = paginaObjetos
 
@@ -237,9 +214,6 @@ local function criarBotao(pagina, nome, texto, y)
 	botao.Text = texto
 	botao.TextColor3 = Color3.fromRGB(226, 229, 236)
 	botao.TextSize = 12
-	botao.TextTransparency = 0
-	botao.Visible = true
-	botao.ZIndex = 10
 	botao.TextXAlignment = Enum.TextXAlignment.Left
 	botao.Parent = pagina
 
@@ -286,9 +260,6 @@ contador.Font = Enum.Font.GothamMedium
 contador.Text = "Objetos selecionados: 0"
 contador.TextColor3 = Color3.fromRGB(165, 170, 183)
 contador.TextSize = 12
-contador.TextTransparency = 0
-contador.Visible = true
-contador.ZIndex = 10
 contador.TextXAlignment = Enum.TextXAlignment.Left
 contador.Parent = paginaObjetos
 
@@ -301,7 +272,99 @@ local atravessarBotao = criarBotao(paginaObjetos, "Atravessar", "→   Atravessa
 local resetarBotao = criarBotao(paginaObjetos, "Resetar", "↺   Resetar paredes", 148)
 
 local invisibilidadeBotao = criarBotao(paginaPlayer, "Invisibilidade", "◌   Invisibilidade: OFF", 8)
-local dropflingBotao = criarBotao(paginaPlayer, "Dropfling", "✦   Dropfling: OFF", 58)
+local flingBotao = criarBotao(paginaFun, "Fling", "✦   Fling: OFF", 8)
+
+local velocidadeTitulo = Instance.new("TextLabel")
+velocidadeTitulo.BackgroundTransparency = 1
+velocidadeTitulo.Position = UDim2.fromOffset(4, 70)
+velocidadeTitulo.Size = UDim2.new(1, -8, 0, 22)
+velocidadeTitulo.Font = Enum.Font.GothamMedium
+velocidadeTitulo.Text = "Velocidade: 16"
+velocidadeTitulo.TextColor3 = Color3.fromRGB(226, 229, 236)
+velocidadeTitulo.TextSize = 12
+velocidadeTitulo.TextXAlignment = Enum.TextXAlignment.Left
+velocidadeTitulo.Parent = paginaFun
+
+local velocidadeBarra = Instance.new("Frame")
+velocidadeBarra.Size = UDim2.new(1, 0, 0, 8)
+velocidadeBarra.Position = UDim2.fromOffset(0, 101)
+velocidadeBarra.BackgroundColor3 = Color3.fromRGB(45, 49, 61)
+velocidadeBarra.BorderSizePixel = 0
+velocidadeBarra.Parent = paginaFun
+local velocidadeBarraCorner = Instance.new("UICorner")
+velocidadeBarraCorner.CornerRadius = UDim.new(1, 0)
+velocidadeBarraCorner.Parent = velocidadeBarra
+
+local velocidadeFill = Instance.new("Frame")
+velocidadeFill.Size = UDim2.new(0, 0, 1, 0)
+velocidadeFill.BackgroundColor3 = Color3.fromRGB(90, 82, 150)
+velocidadeFill.BorderSizePixel = 0
+velocidadeFill.Parent = velocidadeBarra
+local velocidadeFillCorner = Instance.new("UICorner")
+velocidadeFillCorner.CornerRadius = UDim.new(1, 0)
+velocidadeFillCorner.Parent = velocidadeFill
+
+local velocidadeKnob = Instance.new("TextButton")
+velocidadeKnob.Size = UDim2.fromOffset(18, 18)
+velocidadeKnob.Position = UDim2.new(0, -9, 0.5, -9)
+velocidadeKnob.BackgroundColor3 = Color3.fromRGB(235, 232, 255)
+velocidadeKnob.BorderSizePixel = 0
+velocidadeKnob.Text = ""
+velocidadeKnob.AutoButtonColor = false
+velocidadeKnob.Parent = velocidadeBarra
+local velocidadeKnobCorner = Instance.new("UICorner")
+velocidadeKnobCorner.CornerRadius = UDim.new(1, 0)
+velocidadeKnobCorner.Parent = velocidadeKnob
+
+local velocidade = 16
+local velocidadeMin = 1
+local velocidadeMax = 100
+local arrastandoVelocidade = false
+
+local function aplicarVelocidade(valor)
+    velocidade = math.clamp(math.round(valor), velocidadeMin, velocidadeMax)
+    velocidadeTitulo.Text = "Velocidade: " .. velocidade
+    local percentual = (velocidade - velocidadeMin) / (velocidadeMax - velocidadeMin)
+    velocidadeFill.Size = UDim2.new(percentual, 0, 1, 0)
+    velocidadeKnob.Position = UDim2.new(percentual, -9, 0.5, -9)
+    local character = player.Character
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = velocidade
+    end
+end
+
+local function atualizarVelocidadePorMouse()
+    local x = UserInputService:GetMouseLocation().X
+    local esquerda = velocidadeBarra.AbsolutePosition.X
+    local largura = velocidadeBarra.AbsoluteSize.X
+    if largura > 0 then
+        local percentual = math.clamp((x - esquerda) / largura, 0, 1)
+        aplicarVelocidade(velocidadeMin + percentual * (velocidadeMax - velocidadeMin))
+    end
+end
+
+velocidadeKnob.MouseButton1Down:Connect(function()
+    arrastandoVelocidade = true
+end)
+velocidadeBarra.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        arrastandoVelocidade = true
+        atualizarVelocidadePorMouse()
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        arrastandoVelocidade = false
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if arrastandoVelocidade and input.UserInputType == Enum.UserInputType.MouseMovement then
+        atualizarVelocidadePorMouse()
+    end
+end)
+
+aplicarVelocidade(16)
 
 local espBotao = criarBotao(paginaVisual, "ESP", "◎   ESP inimigos: OFF", 8)
 
@@ -313,38 +376,13 @@ info.BackgroundTransparency = 1
 info.Position = UDim2.fromOffset(4, 116)
 info.Size = UDim2.new(1, -8, 0, 90)
 info.Font = Enum.Font.Gotham
-info.Text = "HACKER TOOLS\n\nMenu dividido por categorias para manter as ferramentas organizadas.\nO Dropfling usa a física disponível no cliente."
+info.Text = "HACKER TOOLS\n\nMenu dividido por categorias para manter as ferramentas organizadas.\nA aba FUN reúne ferramentas experimentais para testes."
 info.TextColor3 = Color3.fromRGB(125, 131, 145)
 info.TextSize = 11
 info.TextWrapped = true
 info.TextXAlignment = Enum.TextXAlignment.Left
 info.TextYAlignment = Enum.TextYAlignment.Top
-info.TextTransparency = 0
-info.Visible = true
-info.ZIndex = 10
 info.Parent = paginaConfig
-
--- =========================================================
--- GARANTIA DE RENDERIZAÇÃO DA INTERFACE
--- =========================================================
-
-local function garantirTextoVisivel(objeto, zIndex)
-	if objeto:IsA("TextLabel") or objeto:IsA("TextButton") or objeto:IsA("TextBox") then
-		objeto.Visible = true
-		objeto.TextTransparency = 0
-		objeto.ZIndex = zIndex
-	end
-end
-
-for _, objeto in ipairs(gui:GetDescendants()) do
-	if objeto:IsA("TextLabel") or objeto:IsA("TextButton") or objeto:IsA("TextBox") then
-		if objeto.Parent and objeto.Parent:IsA("Frame") then
-			garantirTextoVisivel(objeto, 10)
-		else
-			garantirTextoVisivel(objeto, 10)
-		end
-	end
-end
 
 -- =========================================================
 -- ABAS
@@ -355,7 +393,7 @@ local function ativarAba(pagina, botao)
 	pagina.Visible = true
 	paginaAtiva = pagina
 
-	for _, aba in ipairs({abaObjetos, abaPlayer, abaVisual, abaConfig}) do
+	for _, aba in ipairs({abaObjetos, abaPlayer, abaVisual, abaConfig, abaFun}) do
 		TweenService:Create(
 			aba,
 			TweenInfo.new(0.12),
@@ -386,6 +424,10 @@ end)
 
 abaConfig.MouseButton1Click:Connect(function()
 	ativarAba(paginaConfig, abaConfig)
+end)
+
+abaFun.MouseButton1Click:Connect(function()
+	ativarAba(paginaFun, abaFun)
 end)
 
 ativarAba(paginaObjetos, abaObjetos)
@@ -649,200 +691,79 @@ end
 invisibilidadeBotao.MouseButton1Click:Connect(alternarInvisibilidade)
 
 -- =========================================================
--- DROPFLING
+-- FLING
 -- =========================================================
 
-local function obterHumanoid(character)
-	return character and character:FindFirstChildOfClass("Humanoid")
+local hiddenfling = false
+local flingThread
+
+local function flingLoop()
+    local movel = 0.1
+
+    while hiddenfling do
+        RunService.Heartbeat:Wait()
+        local character = player.Character
+        local hrp = character and character:FindFirstChild("HumanoidRootPart")
+
+        if hrp then
+            local vel = hrp.Velocity
+            hrp.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
+            RunService.RenderStepped:Wait()
+            hrp.Velocity = vel
+            RunService.Stepped:Wait()
+            hrp.Velocity = vel + Vector3.new(0, movel, 0)
+            movel = -movel
+        end
+    end
 end
 
-local function obterRoot(character)
-	return character and character:FindFirstChild("HumanoidRootPart")
+local function desativarFling()
+    hiddenfling = false
 end
 
-local function tocarDropkick()
-	local character = player.Character
+local function alternarFling()
+    fling = not fling
+    hiddenfling = fling
 
-	if not character then
-		return
-	end
+    flingBotao.Text = fling
+        and "✦   Fling: ON"
+        or "✦   Fling: OFF"
 
-	local humanoid = obterHumanoid(character)
+    flingBotao:SetAttribute("Ativo", fling)
 
-	if not humanoid then
-		return
-	end
+    TweenService:Create(
+        flingBotao,
+        TweenInfo.new(0.15),
+        {BackgroundColor3 = fling and Color3.fromRGB(43, 39, 61) or Color3.fromRGB(29, 33, 43)}
+    ):Play()
 
-	local animator = humanoid:FindFirstChildOfClass("Animator")
-
-	if not animator then
-		animator = Instance.new("Animator")
-		animator.Parent = humanoid
-	end
-
-	if dropAnimationTrack then
-		pcall(function()
-			dropAnimationTrack:Stop(0.05)
-			dropAnimationTrack:Destroy()
-		end)
-		dropAnimationTrack = nil
-	end
-
-	local animation = Instance.new("Animation")
-	animation.AnimationId = DROP_KICK_ANIMATION_ID
-
-	local sucesso, track = pcall(function()
-		return animator:LoadAnimation(animation)
-	end)
-
-	animation:Destroy()
-
-	if sucesso and track then
-		dropAnimationTrack = track
-		dropAnimationTrack.Priority = Enum.AnimationPriority.Action
-		dropAnimationTrack.Looped = false
-		dropAnimationTrack:Play(0.08, 1, 1)
-	end
+    if fling then
+        flingThread = coroutine.create(flingLoop)
+        coroutine.resume(flingThread)
+    else
+        desativarFling()
+    end
 end
 
-local function aplicarDropFling(targetCharacter)
-	if not dropfling then
-		return
-	end
+flingBotao.MouseButton1Click:Connect(alternarFling)
 
-	if not targetCharacter or targetCharacter == player.Character then
-		return
-	end
+flingCharacterConnection = player.CharacterAdded:Connect(function()
+    task.wait(0.25)
 
-	local targetHumanoid = obterHumanoid(targetCharacter)
-	local targetRoot = obterRoot(targetCharacter)
-	local myRoot = obterRoot(player.Character)
+    if invisivel then
+        aplicarInvisibilidade()
+    end
 
-	if not targetHumanoid or not targetRoot or not myRoot then
-		return
-	end
+    local novoHumanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+    if novoHumanoid then
+        novoHumanoid.WalkSpeed = velocidade
+    end
 
-	if targetHumanoid.Health <= 0 then
-		return
-	end
-
-	local direcao = (targetRoot.Position - myRoot.Position)
-
-	if direcao.Magnitude < 0.1 then
-		direcao = myRoot.CFrame.LookVector
-	else
-		direcao = direcao.Unit
-	end
-
-	local forca = 5000
-	local velocidade = direcao * forca + Vector3.new(0, 1600, 0)
-
-	pcall(function()
-		targetRoot.AssemblyLinearVelocity = velocidade
-		targetRoot.AssemblyAngularVelocity = Vector3.new(0, 80, 0)
-	end)
-end
-
-local function procurarPersonagemDoHit(part)
-	if not part then
-		return nil
-	end
-
-	local character = part:FindFirstAncestorOfClass("Model")
-
-	if not character then
-		return nil
-	end
-
-	if not character:FindFirstChildOfClass("Humanoid") then
-		return nil
-	end
-
-	local targetPlayer = Players:GetPlayerFromCharacter(character)
-
-	if targetPlayer and targetPlayer ~= player then
-		return character
-	end
-
-	return nil
-end
-
-local function configurarDropFling()
-	if dropTouchedConnection then
-		dropTouchedConnection:Disconnect()
-		dropTouchedConnection = nil
-	end
-
-	local character = player.Character
-	local root = obterRoot(character)
-
-	if not root then
-		return
-	end
-
-	dropTouchedConnection = root.Touched:Connect(function(part)
-		if not dropfling then
-			return
-		end
-
-		local targetCharacter = procurarPersonagemDoHit(part)
-
-		if targetCharacter then
-			aplicarDropFling(targetCharacter)
-		end
-	end)
-end
-
-local function desativarDropFling()
-	if dropTouchedConnection then
-		dropTouchedConnection:Disconnect()
-		dropTouchedConnection = nil
-	end
-
-	if dropAnimationTrack then
-		pcall(function()
-			dropAnimationTrack:Stop(0.1)
-			dropAnimationTrack:Destroy()
-		end)
-		dropAnimationTrack = nil
-	end
-end
-
-local function alternarDropfling()
-	dropfling = not dropfling
-
-	dropflingBotao.Text = dropfling
-		and "✦   Dropfling: ON"
-		or "✦   Dropfling: OFF"
-
-	dropflingBotao:SetAttribute("Ativo", dropfling)
-
-	TweenService:Create(
-		dropflingBotao,
-		TweenInfo.new(0.15),
-		{BackgroundColor3 = dropfling and Color3.fromRGB(43, 39, 61) or Color3.fromRGB(29, 33, 43)}
-	):Play()
-
-	if dropfling then
-		configurarDropFling()
-		tocarDropkick()
-	else
-		desativarDropFling()
-	end
-end
-
-dropflingBotao.MouseButton1Click:Connect(alternarDropfling)
-
-dropCharacterConnection = player.CharacterAdded:Connect(function()
-	task.wait(0.25)
-
-	if invisivel then
-		aplicarInvisibilidade()
-	end
-
-	if dropfling then
-		configurarDropFling()
-	end
+    if fling then
+        hiddenfling = true
+        flingThread = coroutine.create(flingLoop)
+        coroutine.resume(flingThread)
+    end
 end)
 
 -- =========================================================
@@ -973,16 +894,16 @@ local function resetarTudo()
 		restaurarInvisibilidade()
 	end
 
-	if dropfling then
-		dropfling = false
-		dropflingBotao.Text = "✦   Dropfling: OFF"
-		dropflingBotao:SetAttribute("Ativo", false)
+	if fling then
+		fling = false
+		flingBotao.Text = "✦   Fling: OFF"
+		flingBotao:SetAttribute("Ativo", false)
 		TweenService:Create(
-			dropflingBotao,
+			flingBotao,
 			TweenInfo.new(0.15),
 			{BackgroundColor3 = Color3.fromRGB(29, 33, 43)}
 		):Play()
-		desativarDropFling()
+		desativarFling()
 	end
 
 	if espAtivo then
@@ -1058,7 +979,7 @@ mouse.Button1Down:Connect(function()
 
 	local alvo = mouse.Target
 
-	if alvo and alvo:IsA("BasePart") then
+	if alvo and alvo:IsA("BasePart") and not alvo:IsDescendantOf(player.Character or nil) then
 		selecionarPart(alvo)
 	end
 end)
@@ -1135,9 +1056,9 @@ minimizar.MouseButton1Click:Connect(function()
 end)
 
 fechar.MouseButton1Click:Connect(function()
-	if dropfling then
-		dropfling = false
-		desativarDropFling()
+	if fling then
+		fling = false
+		desativarFling()
 	end
 
 	limparESP()
