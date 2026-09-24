@@ -968,16 +968,12 @@ local function mouseSobreInterface()
 	return #objetos > 0
 end
 
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-	if input.UserInputType ~= Enum.UserInputType.MouseButton1 then
-		return
-	end
-
+mouse.Button1Down:Connect(function()
 	if not selecionando then
 		return
 	end
 
-	if gameProcessedEvent or mouseSobreInterface() then
+	if mouseSobreInterface() then
 		return
 	end
 
