@@ -935,6 +935,66 @@ resetTudoBotao.MouseButton1Click:Connect(resetarTudo)
 -- SELEÇÃO / HOVER
 -- =========================================================
 
+-- =========================================================
+-- SELEÇÃO ROBUSTA DE PARTS / MESHES
+-- =========================================================
+
+local function obterParteSelecionavel(alvo)
+	if not alvo then
+		return nil
+	end
+
+	-- Se o próprio alvo já for uma BasePart, ele é selecionável.
+	if alvo:IsA("BasePart") then
+		if not alvo:IsDescendantOf(player.Character or nil) then
+			return alvo
+		end
+		return nil
+	end
+
+	-- Caso o mouse retorne um objeto dentro de um Model,
+	-- procura a BasePart mais próxima na hierarquia.
+	local atual = alvo
+
+	while atual and atual ~= workspace do
+		if atual:IsA("BasePart") then
+			if not atual:IsDescendantOf(player.Character or nil) then
+				return atual
+			end
+			return nil
+		end
+
+		atual = atual.Parent
+	end
+
+	-- Último recurso: procura uma BasePart dentro do objeto atingido.
+	if alvo:IsA("Model") or alvo:IsA("Folder") then
+		for _, objeto in ipairs(alvo:GetDescendants()) do
+			if objeto:IsA("BasePart") and not objeto:IsDescendantOf(player.Character or nil) then
+				return objeto
+			end
+		end
+	end
+
+	return nil
+end
+
+local function obterAlvoDoMouse()
+	local alvo = mouse.Target
+	return obterParteSelecionavel(alvo)
+end
+
+local function mouseDentroDaJanela()
+	local posicao = UserInputService:GetMouseLocation()
+	local posicaoJanela = janela.AbsolutePosition
+	local tamanhoJanela = janela.AbsoluteSize
+
+	return posicao.X >= posicaoJanela.X
+		and posicao.X <= posicaoJanela.X + tamanhoJanela.X
+		and posicao.Y >= posicaoJanela.Y
+		and posicao.Y <= posicaoJanela.Y + tamanhoJanela.Y
+end
+
 RunService.RenderStepped:Connect(function(deltaTime)
 	rgbHue = (rgbHue + deltaTime * 0.35) % 1
 
@@ -943,9 +1003,9 @@ RunService.RenderStepped:Connect(function(deltaTime)
 	end
 
 	if selecionando and rgbAtivo then
-		local alvo = mouse.Target
+		local alvo = obterAlvoDoMouse()
 
-		if alvo and alvo:IsA("BasePart") and not alvo:IsDescendantOf(player.Character or nil) then
+		if alvo then
 			hoverHighlight.Adornee = alvo
 			hoverHighlight.Enabled = true
 		else
@@ -962,24 +1022,18 @@ RunService.RenderStepped:Connect(function(deltaTime)
 	end
 end)
 
-local function mouseSobreInterface()
-	local posicao = UserInputService:GetMouseLocation()
-	local objetos = player:WaitForChild("PlayerGui"):GetGuiObjectsAtPosition(posicao.X, posicao.Y)
-	return #objetos > 0
-end
-
 mouse.Button1Down:Connect(function()
 	if not selecionando then
 		return
 	end
 
-	if mouseSobreInterface() then
+	if mouseDentroDaJanela() then
 		return
 	end
 
-	local alvo = mouse.Target
+	local alvo = obterAlvoDoMouse()
 
-	if alvo and alvo:IsA("BasePart") and not alvo:IsDescendantOf(player.Character or nil) then
+	if alvo then
 		selecionarPart(alvo)
 	end
 end)
