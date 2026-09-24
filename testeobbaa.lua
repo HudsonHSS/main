@@ -968,18 +968,22 @@ local function mouseSobreInterface()
 	return #objetos > 0
 end
 
-mouse.Button1Down:Connect(function()
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+	if input.UserInputType ~= Enum.UserInputType.MouseButton1 then
+		return
+	end
+
 	if not selecionando then
 		return
 	end
 
-	if mouseSobreInterface() then
+	if gameProcessedEvent or mouseSobreInterface() then
 		return
 	end
 
 	local alvo = mouse.Target
 
-	if alvo and alvo:IsA("BasePart") then
+	if alvo and alvo:IsA("BasePart") and not alvo:IsDescendantOf(player.Character or nil) then
 		selecionarPart(alvo)
 	end
 end)
